@@ -38,7 +38,7 @@ def get_browser_options(browser_type):
 
 @pytest.fixture(params=["chrome", "firefox"])
 def cross_browser_driver(request):
-    browser = os.environ.get('BROWSER', request.param).lower()
+    browser = os.environ.get('BROWSER', request.param).strip().lower()
     options = get_browser_options(browser)
 
     if browser == "chrome":
@@ -54,7 +54,7 @@ def cross_browser_driver(request):
 
 @pytest.fixture(scope="function")
 def driver():
-    browser = os.environ.get('BROWSER', 'chrome').lower()
+    browser = os.environ.get('BROWSER', 'chrome').strip().lower()
     options = get_browser_options(browser)
 
     if browser == "chrome":
