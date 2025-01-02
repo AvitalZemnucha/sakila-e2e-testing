@@ -1,3 +1,4 @@
+import os
 import pytest
 import mysql.connector
 from selenium import webdriver
@@ -15,10 +16,6 @@ def db_connection():
     )
     yield connection
     connection.close()
-
-
-def pytest_addoption(parser):
-    parser.addoption("--browser", action="store", default="chrome", help="Browser to run tests (chrome or firefox)")
 
 
 @pytest.fixture(params=["chrome", "firefox"])

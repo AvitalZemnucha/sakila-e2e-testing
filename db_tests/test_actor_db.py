@@ -28,3 +28,11 @@ def test_actor_names(db_connection):
     assert len(result) == 5
     for first_name, last_name in result:
         assert len(first_name) > 0 and len(last_name) > 0
+
+
+def test_actor_insertion(db_connection):
+    cursor = db_connection.cursor()
+    cursor.execute("INSERT INTO actor (first_name, last_name) VALUES (%s, %s)", ("Kirill", "Zemnucha"))
+    cursor.execute("SELECT * FROM actor WHERE first_name = 'Kirill' AND last_name = 'Zemnucha' ")
+    result = cursor.fetchone()
+    assert result is not None, "Newly inserted actor not found"

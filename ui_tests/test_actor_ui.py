@@ -9,22 +9,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.alert import Alert
 
 
-@pytest.fixture(scope="function")
-def driver():
-    options = Options()
-    options.add_argument("--disable-gpu")  # Disables GPU rendering
-    options.add_argument("--no-sandbox")  # Recommended for Jenkins
-    options.add_argument("--disable-dev-shm-usage")  # Avoid shared memory issues
-    options.add_argument("--window-size=1920,1080")  # Optional: Define browser size
-    # Enable headless mode only in Jenkins
-    if os.getenv("CI", "false").lower() == "true":
-        options.add_argument("--headless")
-    # Initialize the Chrome WebDriver
-    driver = webdriver.Chrome(options=options)
-    yield driver
-    driver.quit()
-
-
 def test_actor_list_page(driver):
     url = "http://127.0.0.1:5000/"
     driver.get(url)
