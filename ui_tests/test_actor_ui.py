@@ -42,10 +42,15 @@ def test_creat_actor(driver):
     wait.until(EC.presence_of_element_located((By.ID, "create-first-name"))).send_keys("NEW_Actor")
     wait.until(EC.presence_of_element_located((By.ID, "create-last-name"))).send_keys("Last_Name")
     driver.find_element(By.XPATH, "//button[@type='submit']").click()
+
     driver.refresh()
+
     wait.until(EC.presence_of_element_located((By.XPATH, "//table//tbody//tr")))
     actor_list = driver.find_elements(By.XPATH, "//table//tbody//tr")
     last_actor = actor_list[-1]
+    for new_actor in actor_list:
+        if new_actor.text == "NEW_Actor":
+            last_actor = new_actor
     assert "NEW_Actor" in last_actor.text, "The new actor's first name is not found in the last row."
     assert "Last_Name" in last_actor.text, "The new actor's last name is not found in the last row."
 
