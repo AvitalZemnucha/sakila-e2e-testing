@@ -1,3 +1,4 @@
+import os
 import pytest
 import mysql.connector
 from selenium import webdriver
@@ -17,18 +18,32 @@ def db_connection():
     connection.close()
 
 
-def pytest_addoption(parser):
-    parser.addoption("--browser", action="store", default="chrome", help="Browser to run tests (chrome or firefox)")
+def get_browser_options(browser_type):
+    if browser_type == "chrome":
+        options = ChromeOptions()
+    elif browser_type == "firefox":
+        options = FirefoxOptions()
+    else:
+        raise ValueError(f"Unsupported browser: {browser_type}")
+
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1920,1080")
+    if os.getenv("CI", "false").lower() == "true":
+        options.add_argument("--headless")
+
+    return options
 
 
 @pytest.fixture(params=["chrome", "firefox"])
 def cross_browser_driver(request):
-    browser = request.param
+    browser = os.environ.get('BROWSER', request.param).lower()
+    options = get_browser_options(browser)
+
     if browser == "chrome":
-        options = ChromeOptions()
         driver = webdriver.Chrome(options=options)
     elif browser == "firefox":
-        options = FirefoxOptions()
         driver = webdriver.Firefox(options=options)
     else:
         raise ValueError(f"Unsupported browser: {browser}")
@@ -39,13 +54,15 @@ def cross_browser_driver(request):
 
 @pytest.fixture(scope="function")
 def driver():
-    options = ChromeOptions()
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
-    if os.getenv("CI", "false").lower() == "true":
-        options.add_argument("--headless")
-    driver = webdriver.Chrome(options=options)
+    browser = os.environ.get('BROWSER', 'chrome').lower()
+    options = get_browser_options(browser)
+
+    if browser == "chrome":
+        driver = webdriver.Chrome(options=options)
+    elif browser == "firefox":
+        driver = webdriver.Firefox(options=options)
+    else:
+        raise ValueError(f"Unsupported browser: {browser}")
+
     yield driver
     driver.quit()
