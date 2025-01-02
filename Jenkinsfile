@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Select browser for tests')
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,38 +12,47 @@ pipeline {
             }
         }
 
+        stage('Setup Python Environment') {
+            steps {
+                bat 'python -m venv venv'
+                bat 'venv\\Scripts\\activate.bat && python -m pip install --upgrade pip'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                // Install dependencies using pip
-                bat 'pip install -r requirements.txt'
+                bat 'venv\\Scripts\\activate.bat && pip install -r requirements.txt'
             }
         }
 
         stage('Run Tests') {
             steps {
-                // Run tests using pytest and generate JUnit report
-                bat 'pytest --junitxml=test-results/results.xml'
+                bat "venv\\Scripts\\activate.bat && pytest --browser=${params.BROWSER} --junitxml=test-results/results.xml"
             }
         }
     }
 
     post {
         always {
-            // Publish test results and archive artifacts
             junit '**/test-results/*.xml'
             archiveArtifacts artifacts: 'test-results/*.xml', fingerprint: true
         }
+        success {
+            echo 'All tests passed successfully!'
+        }
+        failure {
+            echo 'Some tests failed. Please check the results.'
+        }
         changed {
-            // Send email notification if build status changes
             emailext(
                 attachLog: true,
                 body: '''
                     Please check the Jenkins build:
                     Build URL: ${BUILD_URL}
-                    Build Status: ${BUILD_STATUS}
+                    Build Status: ${currentBuild.currentResult}
                 ''',
                 compressLog: true,
-                subject: 'Build \'${JOB_NAME}\' (#${BUILD_NUMBER}) Status Changed',
+                subject: "Build '${env.JOB_NAME}' (#${env.BUILD_NUMBER}) ${currentBuild.currentResult}",
                 to: 'avitaltests@gmail.com'
             )
         }
