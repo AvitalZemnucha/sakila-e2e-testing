@@ -20,22 +20,28 @@ pipeline {
                 // Run tests using pytest and generate JUnit report
                 bat 'pytest --junitxml=test-results/results.xml'
             }
+        }
+    }
 
-            post {
-                // Always publish test results and archive artifacts
-                always {
-                    junit '**/test-results/*.xml'
-                    archiveArtifacts artifacts: 'test-results/*.xml', fingerprint: true
-                }
-                // Optional email notification if there are changes
-                changed {
-                    emailext attachLog: true,
-                             body: 'Please go to ${BUILD_URL} and verify the build',
-                             compressLog: true,
-                             subject: 'Job \'${JOB_NAME}\' (${BUILD_NUMBER}) is waiting for input',
-                             to: 'avitaltests@gmail.com'
-                }
-            }
+    post {
+        always {
+            // Publish test results and archive artifacts
+            junit '**/test-results/*.xml'
+            archiveArtifacts artifacts: 'test-results/*.xml', fingerprint: true
+        }
+        changed {
+            // Send email notification if build status changes
+            emailext(
+                attachLog: true,
+                body: '''
+                    Please check the Jenkins build:
+                    Build URL: ${BUILD_URL}
+                    Build Status: ${BUILD_STATUS}
+                ''',
+                compressLog: true,
+                subject: 'Build \'${JOB_NAME}\' (#${BUILD_NUMBER}) Status Changed',
+                to: 'avitaltests@gmail.com'
+            )
         }
     }
 }
