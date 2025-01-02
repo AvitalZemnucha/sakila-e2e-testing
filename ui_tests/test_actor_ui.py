@@ -49,7 +49,7 @@ def test_creat_actor(driver):
     actor_list = driver.find_elements(By.XPATH, "//table//tbody//tr")
     last_actor = actor_list[-1]
     for new_actor in actor_list:
-        if new_actor.text == "NEW_Actor":
+        if "NEW_Actor" in new_actor.text:
             last_actor = new_actor
     assert "NEW_Actor" in last_actor.text, "The new actor's first name is not found in the last row."
     assert "Last_Name" in last_actor.text, "The new actor's last name is not found in the last row."
