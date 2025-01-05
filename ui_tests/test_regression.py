@@ -15,8 +15,8 @@ def test_visual_regression(driver):
     add_new_actor = driver.find_element(By.XPATH, "//button[contains(text(), 'New')]")
     add_new_actor.click()
     wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.ID, "create-first-name"))).send_keys("NEW_Actor_for_regression")
-    wait.until(EC.presence_of_element_located((By.ID, "create-last-name"))).send_keys("Last_Name_for_regression")
+    wait.until(EC.presence_of_element_located((By.ID, "create-firstName"))).send_keys("NEW_Actor_for_regression")
+    wait.until(EC.presence_of_element_located((By.ID, "create-lastName"))).send_keys("Last_Name_for_regression")
     driver.find_element(By.XPATH, "//button[@type='submit']").click()
 
     driver.refresh()
