@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Rated Films - Sakila Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="navbar-brand">Sakila Database</a>
+        <a href="/" class="nav-link">Actor Management</a>
+        <a href="{{ url_for('top_rated_films') }}" class="nav-link">Top Rated Films</a>
+    </div>
+</nav>
+<div class="container">
+    <h1>Top Rated Films</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Rating</th>
+            <th>Release Year</th>
+            <th>Lead Actors</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for film in films.items %}
+        <tr>
+            <td>{{ film.title }}</td>
+            <td>{{ film.rating }}</td>
+            <td>{{ film.release_year }}</td>
+            <td>{{ film.actors|map(attribute='first_name')|join(', ') }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if films.has_prev %}
+        <a href="{{ url_for('top_rated_films', page=films.prev_num) }}" class="btn btn-primary">&laquo; Previous</a>
+        {% endif %}
+        {% if films.has_next %}
+        <a href="{{ url_for('top_rated_films', page=films.next_num) }}" class="btn btn-primary">Next &raquo;</a>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
