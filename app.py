@@ -94,6 +94,8 @@ def api_top_rated_films():
 @app.route('/api/films', methods=['POST'])
 def api_create_film():
     data = request.json
+    if not data.get('title'):
+        return jsonify({'error': 'Title is required'}), 400
     allowed_features = ['Trailers', 'Commentaries', 'Deleted Scenes', 'Behind the Scenes']
     special_features = data.get('special_features', '')
     if special_features:
@@ -183,6 +185,8 @@ def get_actor_by_id(actor_id):
 @app.route('/api/actors', methods=['POST'])
 def api_create_actor():
     data = request.json
+    if not data.get('first_name') or not data.get('last_name'):
+        return jsonify({'error': 'First name and last name are required'}), 400
     new_actor = Actor(
         first_name=data['first_name'],
         last_name=data['last_name'],
