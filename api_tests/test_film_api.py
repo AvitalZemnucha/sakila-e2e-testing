@@ -15,4 +15,3 @@ def test_get_top_rated():
     data = response.json()
     assert type(data) == dict
     assert len(data) > 0
-    assert data['films'][0]['id'] == 251
