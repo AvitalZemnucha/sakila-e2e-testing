@@ -4,12 +4,13 @@ import mysql.connector
 import time
 
 from conftest import db_connection
-
-BASE_URL = "http://127.0.0.1:5000/api/"
+from ui_tests.constants import (
+    API_BASE_URL
+)
 
 
 def test_add_actor_with_invalid_first_name():
-    url = f"{BASE_URL}/actors"
+    url = f"{API_BASE_URL}/actors"
     new_actor = {
         "first_name": '',
         "last_name": '',
@@ -21,7 +22,7 @@ def test_add_actor_with_invalid_first_name():
 
 
 def test_add_invalid_test_data():
-    url = f"{BASE_URL}/films"
+    url = f"{API_BASE_URL}/films"
     new_film = {
 
         "description": 'A Fast+Paced Documentary',

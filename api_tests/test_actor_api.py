@@ -4,12 +4,13 @@ import mysql.connector
 import time
 
 from conftest import db_connection
-
-BASE_URL = "http://127.0.0.1:5000/api"
+from ui_tests.constants import (
+    API_BASE_URL
+)
 
 
 def test_get_actor():
-    url = f"{BASE_URL}/actors"
+    url = f"{API_BASE_URL}/actors"
     response = requests.get(url)
     assert response.status_code == 200
     actors = response.json()
@@ -18,7 +19,7 @@ def test_get_actor():
 
 def test_create_actor():
     new_actor = {"first_name": "John2", "last_name": "Doe2", "last_update": "2006-02-15 04:34:33"}
-    url = f"{BASE_URL}/actors"
+    url = f"{API_BASE_URL}/actors"
     response = requests.post(url, json=new_actor)
     assert response.status_code == 201
     created_actor = response.json()
@@ -28,7 +29,7 @@ def test_create_actor():
 
 def test_create_actor_integration(db_connection):
     new_actor = {"first_name": "John102", "last_name": "Doe4", "last_update": "2025-01-01 04:34:33"}
-    url = f"{BASE_URL}/actors"
+    url = f"{API_BASE_URL}/actors"
     response = requests.post(url, json=new_actor)
     assert response.status_code == 201
     created_actor = response.json()

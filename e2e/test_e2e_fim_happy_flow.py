@@ -8,10 +8,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-from ui_tests.test_top_rated_films_ui import BASE_URL_UI
-
-BASE_URL = "http://127.0.0.1:5000/api/films"
+from ui_tests.constants import (
+    UI_BASE_URL,
+    ACTOR_LIST,
+    API_BASE_URL,
+    FILM_API_BASE_URL,
+    RESUL_TEXT
+)
 
 
 def test_e2e1(driver, db_connection):
@@ -27,7 +30,7 @@ def test_e2e1(driver, db_connection):
         "rating": "PG",
         "special_features": "Deleted Scenes"
     }
-    response = requests.post(BASE_URL, json=new_film)
+    response = requests.post(FILM_API_BASE_URL, json=new_film)
     data = response.json()
     assert response.status_code == 201, "Expected 201 status code"
     data_film_id = data["id"]
@@ -40,7 +43,7 @@ def test_e2e1(driver, db_connection):
 
     if data_film_id == last_fil_id:
         update_film_rating = {"rating": "NC-17"}
-        response = requests.put(f"{BASE_URL}/{data_film_id}", json=update_film_rating)
+        response = requests.put(f"{FILM_API_BASE_URL}/{data_film_id}", json=update_film_rating)
         data = response.json()
         assert response.status_code == 200, "Expected 200 status code"
         assert data["title"] == "NEW YEAR 2025"
@@ -56,15 +59,15 @@ def test_e2e1(driver, db_connection):
     #         found = True
     #         break
     # assert found == True
-    response = requests.get(f"{BASE_URL}/{data_film_id}")
+    response = requests.get(f"{FILM_API_BASE_URL}/{data_film_id}")
     data_update = response.json()
     assert response.status_code == 200, "Expected 200 status code"
     assert data_update["title"] == "NEW YEAR 2025"
 
     # Delete Film
-    response_delete = requests.delete(f"{BASE_URL}/{data_film_id}")
+    response_delete = requests.delete(f"{FILM_API_BASE_URL}/{data_film_id}")
     assert response_delete.status_code == 204, "Expected 204 status code"
-    response = requests.get(f"{BASE_URL}/{data_film_id}")
+    response = requests.get(f"{FILM_API_BASE_URL}/{data_film_id}")
     assert response.status_code == 404, "Expected 404 status code"
 
     # Verify that film was deleted from DB
@@ -82,12 +85,12 @@ def test_e2e1(driver, db_connection):
     new_connection.close()
 
     # UI check that the film was deleted
-    driver.get(f"{BASE_URL_UI}/top_rated_films?page=23")
+    driver.get(f"{UI_BASE_URL}/top_rated_films?page=23")
     wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.XPATH, "//h1")))
-    result_text = driver.find_element(By.XPATH, "//h1")
+    wait.until(EC.presence_of_element_located((By.XPATH, RESUL_TEXT)))
+    result_text = driver.find_element(By.XPATH, RESUL_TEXT)
     assert "Top Rated Films" in result_text.text
-    table_rows = driver.find_elements(By.XPATH, "//table/tbody/tr")
+    table_rows = driver.find_elements(By.XPATH, ACTOR_LIST)
     film_found = True
     for row in table_rows:
         if "NEW YEAR 2025" in row.text:

@@ -1,0 +1,15 @@
+UI_BASE_URL = "http://127.0.0.1:5000/"
+ACTOR_LIST = "//table//tbody//tr"
+CREATE_NEW_ACTOR = "//button[contains(text(), 'New')]"
+NEW_ACTOR_SUBMIT = "//button[@type='submit']"
+FIRST_NAME_ID = "create-firstName"
+LAST_NAME_ID = "create-lastName"
+EDIT_FIRST_NAME_ID = "edit-firstName"
+EDIT_LAST_NAME_ID = "edit-lastName"
+UPDATE_BUTTON = "//*[@id='edit-form']/button"
+RESUL_TEXT = "//h1"
+
+# API CONST
+API_BASE_URL = "http://127.0.0.1:5000/api/"
+FILM_API_BASE_URL = "http://127.0.0.1:5000/api/films"
+ACTORS_API_URL = "http://127.0.0.1:5000/api/actors"

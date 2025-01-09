@@ -8,9 +8,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-BASE_URL = "http://127.0.0.1:5000/api/actors"
-UI_URL = "http://127.0.0.1:5000/"
+from ui_tests.constants import (
+    UI_BASE_URL,
+    ACTOR_LIST,
+    ACTORS_API_URL
+)
 
 
 def test_e2e_adding_delete_actor(driver, db_connection):
@@ -19,21 +21,21 @@ def test_e2e_adding_delete_actor(driver, db_connection):
         "last_name": "Shaked",
         "last_update": "2006-02-15 04:34:33"
     }
-    response = requests.post(BASE_URL, json=new_actor)
+    response = requests.post(ACTORS_API_URL, json=new_actor)
     data = response.json()
     assert response.status_code == 201, "New Actor was not created successfully..."
     assert data["first_name"] == "Danielle"
 
     # UI VERIFICATION
-    driver.get(UI_URL)
+    driver.get(UI_BASE_URL)
     wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_all_elements_located((By.XPATH, "//table//tbody//tr")))
-    actor_list = driver.find_elements(By.XPATH, "//table//tbody//tr")
+    wait.until(EC.presence_of_all_elements_located((By.XPATH, ACTOR_LIST)))
+    actor_list = driver.find_elements(By.XPATH, ACTOR_LIST)
     last_actor = actor_list[-1]
     assert "Danielle" in last_actor.text
 
     # DELETING ACTOR VIA API
-    response = requests.delete(f"{BASE_URL}/{data['id']}")
+    response = requests.delete(f"{ACTORS_API_URL}/{data['id']}")
     assert response.status_code == 204, "Actor was not deleted successfully..."
 
     # SEARCHING THE DELETED ACTOR IN DB
