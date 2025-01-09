@@ -7,7 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from constants import (
     UI_BASE_URL,
-    ACTOR_LIST
+    ACTOR_LIST,
+    RESUL_TEXT
 )
 
 
@@ -16,8 +17,8 @@ def test_top_rated_films_ui(driver):
     top_rated_films = driver.find_element(By.XPATH, "//a[@class='nav-link'][2]")
     top_rated_films.click()
     wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.XPATH, "//h1")))
-    result_text = driver.find_element(By.XPATH, "//h1")
+    wait.until(EC.presence_of_element_located((By.XPATH, RESUL_TEXT)))
+    result_text = driver.find_element(By.XPATH, RESUL_TEXT)
     assert "Top Rated Films" in result_text.text
     table_rows = driver.find_elements(By.XPATH, ACTOR_LIST)
     film_found = False

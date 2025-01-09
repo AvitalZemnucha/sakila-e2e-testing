@@ -9,37 +9,34 @@ from ui_tests.constants import (
 )
 
 
-def test_get_actor():
-    url = f"{API_BASE_URL}/actors"
-    response = requests.get(url)
+def test_get_actor(base_url):
+    response = requests.get(base_url)
     assert response.status_code == 200
     actors = response.json()
     assert len(actors) > 0
 
 
-def test_create_actor():
-    new_actor = {"first_name": "John2", "last_name": "Doe2", "last_update": "2006-02-15 04:34:33"}
+def test_create_actor(base_url, actor_sample):
     url = f"{API_BASE_URL}/actors"
-    response = requests.post(url, json=new_actor)
+    response = requests.post(url, json=actor_sample)
     assert response.status_code == 201
     created_actor = response.json()
     assert created_actor["first_name"] == "John2"
     assert created_actor["last_name"] == "Doe2"
 
 
-def test_create_actor_integration(db_connection):
-    new_actor = {"first_name": "John102", "last_name": "Doe4", "last_update": "2025-01-01 04:34:33"}
-    url = f"{API_BASE_URL}/actors"
-    response = requests.post(url, json=new_actor)
-    assert response.status_code == 201
-    created_actor = response.json()
-    assert created_actor["first_name"] == "John102"
-    assert created_actor["last_name"] == "Doe4"
-    new_actor_first_name = created_actor["first_name"]
+def test_create_actor_integration(db_connection, base_url, actor_integration_sample, create_actor):
+    # Create actor using fixture
+    created_actor = create_actor(actor_integration_sample)
+
+    # Assertions for API response
+    assert created_actor["first_name"] == actor_integration_sample["first_name"]
+    assert created_actor["last_name"] == actor_integration_sample["last_name"]
 
     cursor = db_connection.cursor()
-    cursor.execute(f"SELECT * FROM actor WHERE first_name='{new_actor_first_name}'")
+    cursor.execute(f"SELECT * FROM actor WHERE first_name='{created_actor['first_name']}'")
     result = cursor.fetchone()
+
     assert result is not None
-    assert result[1] == "John102"
-    assert result[2] == "Doe4"
+    assert result[1] == actor_integration_sample["first_name"]
+    assert result[2] == actor_integration_sample["last_name"]

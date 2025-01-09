@@ -12,3 +12,11 @@ def db_connection():
     )
     yield connection
     connection.close()
+
+
+@pytest.fixture
+def db_cursor(db_connection):
+    """Provide a reusable database cursor for tests."""
+    cursor = db_connection.cursor()
+    yield cursor
+    cursor.close()

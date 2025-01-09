@@ -9,33 +9,15 @@ from ui_tests.constants import (
 )
 
 
-def test_add_actor_with_invalid_first_name():
+def test_add_actor_with_invalid_first_name(actor_invalid_sample):
     url = f"{API_BASE_URL}/actors"
-    new_actor = {
-        "first_name": '',
-        "last_name": '',
-        "last_update": "2006-02-15 04:34:33"
-    }
-    response = requests.post(url, json=new_actor)
+    response = requests.post(url, json=actor_invalid_sample)
     assert response.status_code == 400, f"Expected 400, got {response.status_code}"
     assert "First name and last name are required" in response.json()['error']
 
 
-def test_add_invalid_test_data():
+def test_add_invalid_test_data(film_invalid_data):
     url = f"{API_BASE_URL}/films"
-    new_film = {
-
-        "description": 'A Fast+Paced Documentary',
-        "release_year": '2025',
-        "language_id": '1',  # Default to 1 if not provided
-        "rental_duration": '6',
-        "rental_rate": '4.99',
-        "length": '180',
-        "replacement_cost": '19.99',
-        "rating": 'PG-13',
-        "special_features": 'Deleted Scenes'
-    }
-
-    response = requests.post(url, json=new_film)
+    response = requests.post(url, json=film_invalid_data)
     assert response.status_code == 400, f"Expected 400, got {response.status_code}"
     assert "Title is required" in response.json()['error']
