@@ -44,7 +44,7 @@ def test_search_for_non_existing_actor(driver):
 
 def test_edit_actor(driver):
     driver.get(UI_BASE_URL)
-    edit_button = driver.find_element(By.XPATH, "//button[@data-id='1']")
+    edit_button = driver.find_element(By.XPATH, "//tr[@id='actor-1']//button[contains(text(), 'Edit')]")
     edit_button.click()
     wait = WebDriverWait(driver, 10)
     first_name = wait.until(EC.presence_of_element_located((By.ID, EDIT_FIRST_NAME_ID)))

@@ -50,7 +50,7 @@ def test_creat_actor(driver):
 def test_update_actor(driver):
     driver.get(UI_BASE_URL)
     wait = WebDriverWait(driver, 10)
-    driver.find_element(By.XPATH, "//button[@data-id='216']").click()
+    driver.find_element(By.XPATH, "//tr[@id='actor-1']//button[contains(text(), 'Edit')]").click()
     wait.until(EC.presence_of_element_located((By.ID, EDIT_FIRST_NAME_ID))).clear()
     driver.find_element(By.ID, EDIT_FIRST_NAME_ID).send_keys("AvitalUpdated")
     wait.until(EC.presence_of_element_located((By.ID, EDIT_LAST_NAME_ID))).clear()

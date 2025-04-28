@@ -16,6 +16,12 @@ from ui_tests.constants import (
 
 
 def test_e2e_adding_delete_actor(driver, db_connection):
+    """
+
+    :param driver:
+    :param db_connection:
+    :return:
+    """
     new_actor = {
         "first_name": "Danielle",
         "last_name": "Shaked",

@@ -1,3 +1,143 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Sakila Database Management</title>-->
+<!--    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">-->
+<!--</head>-->
+<!--<body>-->
+<!--<nav class="navbar">-->
+<!--    <div class="container">-->
+<!--        <a href="/" class="navbar-brand">Sakila Database</a>-->
+<!--        <a href="/" class="nav-link">Actor Management</a>-->
+<!--        <a href="{{ url_for('top_rated_films') }}" class="nav-link">Top Rated Films</a>-->
+<!--    </div>-->
+<!--</nav>-->
+<!--<div class="container">-->
+<!--    <h1>Actors</h1>-->
+<!--    <table>-->
+<!--        <thead>-->
+<!--        <tr>-->
+<!--            <th>ID</th>-->
+<!--            <th>First Name</th>-->
+<!--            <th>Last Name</th>-->
+<!--            <th>Actions</th>-->
+<!--        </tr>-->
+<!--        </thead>-->
+<!--        <tbody id="actor-table-body">-->
+<!--        {% for actor in actors %}-->
+<!--        <tr id="actor-{{ actor.actor_id }}">-->
+<!--            <td>{{ actor.actor_id }}</td>-->
+<!--            <td>{{ actor.first_name }}</td>-->
+<!--            <td>{{ actor.last_name }}</td>-->
+<!--            <td>-->
+<!--                <button class="btn btn-primary edit-btn" data-id="{{ actor.actor_id }}"-->
+<!--                        data-first-name="{{ actor.first_name }}" data-last-name="{{ actor.last_name }}"-->
+<!--                        onclick="openEditModal(this)">Edit-->
+<!--                </button>-->
+<!--                <button class="btn btn-danger delete-btn" data-id="{{ actor.actor_id }}" onclick="deleteActor(this)">-->
+<!--                    Delete-->
+<!--                </button>-->
+<!--            </td>-->
+<!--        </tr>-->
+<!--        {% endfor %}-->
+<!--        </tbody>-->
+<!--    </table>-->
+
+<!--    <button class="btn btn-success" onclick="openCreateModal()">Add New Actor</button>-->
+
+<!--    <div id="createModal">-->
+<!--        <div class="modal-content">-->
+<!--            <span class="close" onclick="closeCreateModal()">&times;</span>-->
+<!--            <h2>Add New Actor</h2>-->
+<!--            <form id="create-form">-->
+<!--                <label for="create-firstName">First Name:</label>-->
+<!--                <input type="text" id="create-firstName" required>-->
+<!--                <label for="create-lastName">Last Name:</label>-->
+<!--                <input type="text" id="create-lastName" required>-->
+<!--                <button type="submit" class="btn btn-primary">Create</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div id="editModal">-->
+<!--        <div class="modal-content">-->
+<!--            <span class="close" onclick="closeEditModal()">&times;</span>-->
+<!--            <h2>Edit Actor</h2>-->
+<!--            <form id="edit-form">-->
+<!--                <input type="hidden" id="edit-actor-id">-->
+<!--                <label for="edit-firstName">First Name:</label>-->
+<!--                <input type="text" id="edit-firstName" required>-->
+<!--                <label for="edit-lastName">Last Name:</label>-->
+<!--                <input type="text" id="edit-lastName" required>-->
+<!--                <button type="submit" class="btn btn-primary">Update</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--<script>-->
+<!--    // Function to open the create modal-->
+<!--    function openCreateModal() {-->
+<!--        $('#createModal').show(); // Show the modal-->
+<!--    }-->
+
+<!--    // Function to close the create modal-->
+<!--    function closeCreateModal() {-->
+<!--        $('#createModal').hide(); // Hide the modal-->
+<!--    }-->
+
+<!--    // Close modal when clicking outside of it-->
+<!--    $(window).click(function (event) {-->
+<!--        if ($(event.target).is('#createModal')) {-->
+<!--            closeCreateModal();-->
+<!--        }-->
+<!--    });-->
+
+<!--    // Function to open the edit modal-->
+<!--    function openEditModal(button) {-->
+<!--        const actorId = button.getAttribute('data-id');-->
+<!--        const firstName = button.getAttribute('data-first-name');-->
+<!--        const lastName = button.getAttribute('data-last-name');-->
+
+<!--        // Set values in the edit form-->
+<!--        document.getElementById('edit-actor-id').value = actorId;-->
+<!--        document.getElementById('edit-firstName').value = firstName;-->
+<!--        document.getElementById('edit-lastName').value = lastName;-->
+
+<!--        // Show the edit modal-->
+<!--        $('#editModal').show();-->
+<!--    }-->
+
+<!--    // Function to close the edit modal-->
+<!--    function closeEditModal() {-->
+<!--        $('#editModal').hide();-->
+<!--    }-->
+
+<!--    // Function to delete an actor-->
+<!--    function deleteActor(button) {-->
+<!--        const actorId = button.getAttribute('data-id');-->
+
+<!--        if (confirm("Are you sure you want to delete this actor?")) {-->
+<!--            // Send DELETE request to the server-->
+<!--            $.ajax({-->
+<!--                url: `/api/actors/${actorId}`,-->
+<!--                type: 'DELETE',-->
+<!--                success: function (result) {-->
+<!--                    // Remove the actor row from the table-->
+<!--                    $(`#actor-${actorId}`).remove();-->
+<!--                },-->
+<!--                error: function (err) {-->
+<!--                    alert("Error deleting actor.");-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +154,7 @@
         <a href="{{ url_for('top_rated_films') }}" class="nav-link">Top Rated Films</a>
     </div>
 </nav>
+
 <div class="container">
     <h1>Actors</h1>
     <table>
@@ -32,13 +173,11 @@
             <td>{{ actor.first_name }}</td>
             <td>{{ actor.last_name }}</td>
             <td>
-                <button class="btn btn-primary edit-btn" data-id="{{ actor.actor_id }}"
-                        data-first-name="{{ actor.first_name }}" data-last-name="{{ actor.last_name }}"
-                        onclick="openEditModal(this)">Edit
+                <button class="btn btn-primary"
+                        onclick="openEditModal({{ actor.actor_id }}, '{{ actor.first_name }}', '{{ actor.last_name }}')">
+                    Edit
                 </button>
-                <button class="btn btn-danger delete-btn" data-id="{{ actor.actor_id }}" onclick="deleteActor(this)">
-                    Delete
-                </button>
+                <button class="btn btn-danger" onclick="deleteActor({{ actor.actor_id }})">Delete</button>
             </td>
         </tr>
         {% endfor %}
@@ -47,94 +186,130 @@
 
     <button class="btn btn-success" onclick="openCreateModal()">Add New Actor</button>
 
-    <div id="createModal">
+    <!-- Create Actor Modal -->
+    <div id="createModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close" onclick="closeCreateModal()">&times;</span>
             <h2>Add New Actor</h2>
             <form id="create-form">
                 <label for="create-firstName">First Name:</label>
-                <input type="text" id="create-firstName" required>
+                <input type="text" id="create-firstName" name="first_name" required>
                 <label for="create-lastName">Last Name:</label>
-                <input type="text" id="create-lastName" required>
+                <input type="text" id="create-lastName" name="last_name" required>
                 <button type="submit" class="btn btn-primary">Create</button>
             </form>
         </div>
     </div>
 
-    <div id="editModal">
+    <!-- Edit Actor Modal -->
+    <div id="editModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
             <h2>Edit Actor</h2>
             <form id="edit-form">
                 <input type="hidden" id="edit-actor-id">
                 <label for="edit-firstName">First Name:</label>
-                <input type="text" id="edit-firstName" required>
+                <input type="text" id="edit-firstName" name="first_name" required>
                 <label for="edit-lastName">Last Name:</label>
-                <input type="text" id="edit-lastName" required>
+                <input type="text" id="edit-lastName" name="last_name" required>
                 <button type="submit" class="btn btn-primary">Update</button>
             </form>
         </div>
     </div>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-    // Function to open the create modal
+    // Open and Close Create Modal
     function openCreateModal() {
-        $('#createModal').show(); // Show the modal
+        $('#createModal').show();
     }
 
-    // Function to close the create modal
     function closeCreateModal() {
-        $('#createModal').hide(); // Hide the modal
+        $('#createModal').hide();
     }
 
-    // Close modal when clicking outside of it
-    $(window).click(function (event) {
-        if ($(event.target).is('#createModal')) {
-            closeCreateModal();
-        }
-    });
-
-    // Function to open the edit modal
-    function openEditModal(button) {
-        const actorId = button.getAttribute('data-id');
-        const firstName = button.getAttribute('data-first-name');
-        const lastName = button.getAttribute('data-last-name');
-
-        // Set values in the edit form
-        document.getElementById('edit-actor-id').value = actorId;
-        document.getElementById('edit-firstName').value = firstName;
-        document.getElementById('edit-lastName').value = lastName;
-
-        // Show the edit modal
+    // Open and Close Edit Modal
+    function openEditModal(id, firstName, lastName) {
+        $('#edit-actor-id').val(id);
+        $('#edit-firstName').val(firstName);
+        $('#edit-lastName').val(lastName);
         $('#editModal').show();
     }
 
-    // Function to close the edit modal
     function closeEditModal() {
         $('#editModal').hide();
     }
 
-    // Function to delete an actor
-    function deleteActor(button) {
-        const actorId = button.getAttribute('data-id');
+    // Close Modals if clicking outside
+    $(window).click(function (event) {
+        if ($(event.target).is('#createModal')) {
+            closeCreateModal();
+        }
+        if ($(event.target).is('#editModal')) {
+            closeEditModal();
+        }
+    });
 
-        if (confirm("Are you sure you want to delete this actor?")) {
-            // Send DELETE request to the server
+    // Create Actor - AJAX POST
+    $('#create-form').submit(function (e) {
+        e.preventDefault();
+        const firstName = $('#create-firstName').val();
+        const lastName = $('#create-lastName').val();
+
+        $.ajax({
+            url: '/api/actors',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ first_name: firstName, last_name: lastName }),
+            success: function () {
+                location.reload(); // Reload page after creation
+            },
+            error: function () {
+                alert('Error creating actor.');
+            }
+        });
+    });
+
+    // Edit Actor - AJAX PUT
+    $('#edit-form').submit(function (e) {
+        e.preventDefault();
+        const actorId = $('#edit-actor-id').val();
+        const firstName = $('#edit-firstName').val();
+        const lastName = $('#edit-lastName').val();
+
+        $.ajax({
+            url: `/api/actors/${actorId}`,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({ first_name: firstName, last_name: lastName }),
+            success: function () {
+                location.reload(); // Reload page after update
+            },
+            error: function () {
+                alert('Error updating actor.');
+            }
+        });
+    });
+
+    // Delete Actor - AJAX DELETE
+    function deleteActor(actorId) {
+        if (confirm('Are you sure you want to delete this actor?')) {
             $.ajax({
                 url: `/api/actors/${actorId}`,
                 type: 'DELETE',
-                success: function (result) {
-                    // Remove the actor row from the table
-                    $(`#actor-${actorId}`).remove();
+                success: function () {
+                    $(`#actor-${actorId}`).remove(); // Remove from table
                 },
-                error: function (err) {
-                    alert("Error deleting actor.");
+                error: function () {
+                    alert('Error deleting actor.');
                 }
             });
         }
     }
 </script>
+
 </body>
 </html>
