@@ -1,0 +1,21 @@
+# Web Framework
+Flask==3.0.3
+
+# UI Testing
+selenium==4.25.0
+webdriver-manager==4.0.2
+
+# API Testing
+requests==2.32.3
+
+# Database Testing
+SQLAlchemy==2.0.35
+PyMySQL==1.1.1
+
+# Testing Framework & Reporting
+pytest==8.3.3
+pytest-html==4.1.1
+pytest-xdist==3.6.1
+
+# Data Generation
+Faker==28.4.1
