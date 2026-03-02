@@ -4,7 +4,7 @@ import mysql.connector
 import time
 
 from conftest import db_connection
-from ui_tests.constants import (
+from config_data import (
     FILM_API_BASE_URL
 )
 

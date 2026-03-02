@@ -3,9 +3,9 @@ import mysql.connector
 
 
 def test_actor_count(db_cursor):
-    db_cursor.execute("SELECT COUNT(*) FROM actor")
+    db_cursor.execute("SELECT COUNT(*) AS total FROM actor")
     result = db_cursor.fetchone()
-    assert result[0] > 0
+    assert result['total'] > 0
 
 
 def test_actor_names(db_cursor):

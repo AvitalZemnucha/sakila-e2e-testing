@@ -4,13 +4,13 @@ import mysql.connector
 import time
 
 from conftest import db_connection
-from ui_tests.constants import (
+from config_data import (
     API_BASE_URL
 )
 
 
 def test_add_actor_with_invalid_first_name(actor_invalid_sample):
-    url = f"{API_BASE_URL}/actors"
+    url = base_url()
     response = requests.post(url, json=actor_invalid_sample)
     assert response.status_code == 400, f"Expected 400, got {response.status_code}"
     assert "First name and last name are required" in response.json()['error']

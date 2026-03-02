@@ -1,36 +1,32 @@
 import pytest
 import requests
-import mysql.connector
 from conftest import db_connection
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.chrome.options import Options
+from faker import Faker
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from ui_tests.constants import (
+from config_data import (
     UI_BASE_URL,
     ACTOR_LIST,
     ACTORS_API_URL
 )
 
+fake = Faker()
+
 
 def test_e2e_adding_delete_actor(driver, db_connection):
-    """
+    random_first_name = fake.first_name()
+    random_last_name = fake.last_name()
 
-    :param driver:
-    :param db_connection:
-    :return:
-    """
     new_actor = {
-        "first_name": "Danielle",
-        "last_name": "Shaked",
+        "first_name": random_first_name,
+        "last_name": random_last_name,
         "last_update": "2006-02-15 04:34:33"
     }
     response = requests.post(ACTORS_API_URL, json=new_actor)
     data = response.json()
     assert response.status_code == 201, "New Actor was not created successfully..."
-    assert data["first_name"] == "Danielle"
+    assert data["first_name"] == random_first_name
 
     # UI VERIFICATION
     driver.get(UI_BASE_URL)
@@ -38,7 +34,7 @@ def test_e2e_adding_delete_actor(driver, db_connection):
     wait.until(EC.presence_of_all_elements_located((By.XPATH, ACTOR_LIST)))
     actor_list = driver.find_elements(By.XPATH, ACTOR_LIST)
     last_actor = actor_list[-1]
-    assert "Danielle" in last_actor.text
+    assert random_first_name in last_actor.text
 
     # DELETING ACTOR VIA API
     response = requests.delete(f"{ACTORS_API_URL}/{data['id']}")

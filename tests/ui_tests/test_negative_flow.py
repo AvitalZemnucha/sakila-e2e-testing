@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import UnexpectedAlertPresentException
 from selenium.webdriver.common.alert import Alert
 
-from constants import (
+from config_data import (
     UI_BASE_URL,
     ACTOR_LIST,
     CREATE_NEW_ACTOR,

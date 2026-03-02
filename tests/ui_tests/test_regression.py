@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PIL import Image, ImageChops
-from constants import (
+from config_data import (
     UI_BASE_URL,
     ACTOR_LIST,
     CREATE_NEW_ACTOR,
