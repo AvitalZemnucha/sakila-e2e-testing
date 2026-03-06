@@ -19,3 +19,5 @@ pytest-xdist==3.6.1
 
 # Data Generation
 Faker==28.4.1
+
+mysql-connector-python==9.0.0
