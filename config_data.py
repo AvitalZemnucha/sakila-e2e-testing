@@ -24,7 +24,8 @@ LAST_NAME_ID = "create-lastName"
 EDIT_FIRST_NAME_ID = "edit-firstName"
 EDIT_LAST_NAME_ID = "edit-lastName"
 UPDATE_BUTTON = "//*[@id='edit-form']/button"
-RESUL_TEXT = "//h1"
+RESULT_TEXT = "Showing"
+TOP_RATED_LINK = "http://127.0.0.1:5000/top_rated_films"
 
 # API CONST
 API_BASE_URL = "http://127.0.0.1:5000/api/"

@@ -1,33 +1,25 @@
 import pytest
 import requests
-import mysql.connector
-from conftest import db_connection
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from config_data import (
-    UI_BASE_URL,
-    ACTOR_LIST,
-    API_BASE_URL
-)
+from tests.base_test import BaseTest
+from config_data import API_BASE_URL, INVALID_ACTOR_DATA
 
 
-def test_add_actor_with_invalid_first_name(driver):
-    url = f"{API_BASE_URL}/actors"
-    new_actor = {
-        "first_name": '',
-        "last_name": '',
-        "last_update": "2006-02-15 04:34:33"
-    }
-    response = requests.post(url, json=new_actor)
-    assert response.status_code == 400, f"Expected 400, got {response.status_code}"
-    assert "First name and last name are required" in response.json()['error']
-    driver.get(UI_BASE_URL)
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_all_elements_located((By.XPATH, ACTOR_LIST)))
-    actor_list = driver.find_elements(By.XPATH, ACTOR_LIST)
-    last_actor = actor_list[-1]
-    assert "Danielle" not in last_actor.text
+class TestNegativeFlowE2EActor(BaseTest):
+    def test_add_actor_with_invalid_first_name(self):
+        """
+               E2E Negative Flow:
+               1. API must reject an actor with empty first/last name (400).
+               2. UI must confirm the invalid actor was never added to the table.
+        """
+        response = requests.post(f"{API_BASE_URL}actors", json=INVALID_ACTOR_DATA)
+        assert response.status_code == 400, (f"Expected 400 Bad Request, got {response.status_code}"
+                                             )
+        assert "First name and last name are required" in response.json().get("error", ""), (
+            f"Unexpected error message: {response.json()}"
+        )
+        self.actor_page.open()
+        last_actor = self.actor_page.get_last_actor_row()
+        assert last_actor is not None, "Actor table is empty — cannot verify."
+        assert "Danielle" not in last_actor.text, (
+            f"Invalid actor appeared in the table. Last row: '{last_actor.text}'"
+        )

@@ -1,10 +1,13 @@
 # Sakila E2E Test Automation Project
 
-This project provides a full-stack end-to-end testing solution for the Sakila Sample Database application. It includes a Python Flask web application and a comprehensive test suite covering **UI (Selenium)**, **API (Requests)**, and **Database (SQLAlchemy)** testing.
+This project provides a full-stack end-to-end testing solution for the Sakila Sample Database application. It includes a
+Python Flask web application and a comprehensive test suite covering **UI (Selenium)**, **API (Requests)**, and *
+*Database (SQLAlchemy)** testing.
 
 ## 🚀 Project Architecture
 
-The project follows the **Page Object Model (POM)** pattern for UI tests and uses a centralized `conftest.py` for shared fixtures.
+The project follows the **Page Object Model (POM)** pattern for UI tests and uses a centralized `conftest.py` for shared
+fixtures.
 
 * **App:** Flask (Python)
 * **Testing Framework:** Pytest
@@ -18,28 +21,27 @@ The project follows the **Page Object Model (POM)** pattern for UI tests and use
 ## 🛠️ Setup and Installation
 
 1. **Clone the repository:**
+
 ```bash
 git clone <repository-url>
 cd sakila-e2e-testing
 
 ```
 
-
 2. **Create a Virtual Environment:**
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 ```
 
-
 3. **Install Dependencies:**
+
 ```bash
 pip install -r requirements.txt
 
 ```
-
-
 
 ---
 
@@ -48,11 +50,11 @@ pip install -r requirements.txt
 Before running any tests, the local server and database connection must be active.
 
 1. **Start the Flask App:**
+
 ```bash
 python app.py
 
 ```
-
 
 2. The app will be available at: `http://127.0.0.1:5000`
 
@@ -68,6 +70,13 @@ The project is organized into sub-packages under the `tests/` directory. You can
 pytest
 
 ```
+
+### Cross-Browser UI Execution
+
+* **Run only on Chrome:** `pytest tests/ui_tests -k "chrome"`
+* **Run only on Firefox:** `pytest tests/ui_tests -k "firefox"`
+* **Run only on Edge:** `pytest tests/ui_tests -k "edge"`
+* **Run all browsers with logs visible (shows browser names)::** `pytest tests/ui_tests -s`
 
 ### Run Specific Test Suites
 

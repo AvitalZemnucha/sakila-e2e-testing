@@ -1,42 +1,38 @@
 import pytest
 import requests
-import mysql.connector
-import time
-
 from conftest import db_connection
 from config_data import (
     API_BASE_URL
 )
 
 
-def test_get_actor(base_url):
-    response = requests.get(base_url)
+def test_get_actor(api_actors_url):
+    response = requests.get(api_actors_url)
     assert response.status_code == 200
     actors = response.json()
     assert len(actors) > 0
 
 
-def test_create_actor(base_url, actor_sample):
-    url = f"{API_BASE_URL}/actors"
+def test_create_actor_with_faker(api_actors_url, actor_sample):
+    url = api_actors_url
     response = requests.post(url, json=actor_sample)
     assert response.status_code == 201
     created_actor = response.json()
-    assert created_actor["first_name"] == "John2"
-    assert created_actor["last_name"] == "Doe2"
+    assert created_actor["first_name"] == actor_sample["first_name"]
+    assert created_actor["last_name"] == actor_sample["last_name"]
 
 
-def test_create_actor_integration(db_connection, base_url, actor_integration_sample, create_actor):
-    # Create actor using fixture
-    created_actor = create_actor(actor_integration_sample)
+def test_create_actor_integration_api_db(db_cursor, api_actors_url, actor_sample, create_actor):
+    # Create actor using faker
+    created_actor = create_actor(actor_sample)
 
     # Assertions for API response
-    assert created_actor["first_name"] == actor_integration_sample["first_name"]
-    assert created_actor["last_name"] == actor_integration_sample["last_name"]
+    assert created_actor["first_name"] == actor_sample["first_name"]
+    assert created_actor["last_name"] == actor_sample["last_name"]
 
-    cursor = db_connection.cursor()
-    cursor.execute(f"SELECT * FROM actor WHERE first_name='{created_actor['first_name']}'")
-    result = cursor.fetchone()
+    query = "SELECT first_name, last_name FROM actor WHERE first_name = %s AND last_name = %s"
+    db_cursor.execute(query, (actor_sample["first_name"], actor_sample["last_name"]))
+    result = db_cursor.fetchone()
 
-    assert result is not None
-    assert result[1] == actor_integration_sample["first_name"]
-    assert result[2] == actor_integration_sample["last_name"]
+    assert result is not None, f"Actor {actor_sample['first_name']} not found in DB"
+    assert result["first_name"] == actor_sample["first_name"]

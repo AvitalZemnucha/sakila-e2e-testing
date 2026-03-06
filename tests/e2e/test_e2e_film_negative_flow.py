@@ -1,50 +1,38 @@
-import pytest
 import requests
-import mysql.connector
-from conftest import db_connection
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from config_data import (
-    UI_BASE_URL,
-    ACTOR_LIST,
-    API_BASE_URL,
-    FILM_API_BASE_URL,
-    RESUL_TEXT
-)
+from tests.base_test import BaseTest
+from pages.film_page import FilmPage
+from config_data import FILM_API_BASE_URL, INVALID_FILM_DATA
 
 
-def test_adding_film_with_missing_title(driver):
-    url = f"{FILM_API_BASE_URL}"
-    new_film = {
+class TestFilmNegativeFlowE2E(BaseTest):
+    film_page: FilmPage
 
-        "description": 'A Fast+Paced Documentary',
-        "release_year": '2025',
-        "language_id": '1',  # Default to 1 if not provided
-        "rental_duration": '6',
-        "rental_rate": '4.99',
-        "length": '180',
-        "replacement_cost": '19.99',
-        "rating": 'PG-13',
-        "special_features": 'Deleted Scenes'
-    }
+    def test_adding_film_with_missing_title_is_rejected(self):
+        """
+        E2E Negative Flow:
+        1. API must reject a film payload with no title (400).
+        2. UI must confirm the last page of Top Rated Films is unchanged.
+        """
+        # --- Step 1: API Layer — assert the request is rejected ---
+        response = requests.post(FILM_API_BASE_URL, json=INVALID_FILM_DATA)
 
-    response = requests.post(url, json=new_film)
-    assert response.status_code == 400, f"Expected 400, got {response.status_code}"
-    assert "Title is required" in response.json()['error']
+        assert response.status_code == 400, (
+            f"Expected 400 Bad Request, got {response.status_code}"
+        )
+        assert "Title is required" in response.json().get("error", ""), (
+            f"Unexpected error message: {response.json()}"
+        )
 
-    driver.get(f"{UI_BASE_URL}/top_rated_films?page=23")
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.XPATH, RESUL_TEXT)))
-    result_text = driver.find_element(By.XPATH, RESUL_TEXT)
-    assert "Top Rated Films" in result_text.text
-    table_rows = driver.find_elements(By.XPATH, ACTOR_LIST)
-    row_count_before = len(table_rows)
-    driver.refresh()
-    wait.until(EC.presence_of_element_located((By.XPATH, ACTOR_LIST)))
-    table_rows_after = driver.find_elements(By.XPATH, ACTOR_LIST)
-    row_count_after = len(table_rows_after)
-    assert row_count_before == row_count_after, "The table row count changed unexpectedly after a failed film creation."
+        # --- Step 2: UI Layer — confirm table row count is unchanged ---
+        self.film_page.open_last_page()
+
+        row_count_before = self.film_page.get_table_row_count()
+        assert row_count_before > 0, "Film table is empty — cannot verify row count."
+
+        self.film_page.refresh()
+
+        row_count_after = self.film_page.get_table_row_count()
+        assert row_count_before == row_count_after, (
+            f"Row count changed after failed film creation: "
+            f"before={row_count_before}, after={row_count_after}"
+        )

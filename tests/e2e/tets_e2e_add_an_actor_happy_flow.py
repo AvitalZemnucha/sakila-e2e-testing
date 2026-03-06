@@ -1,49 +1,52 @@
-import pytest
 import requests
-from conftest import db_connection
 from faker import Faker
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from config_data import (
-    UI_BASE_URL,
-    ACTOR_LIST,
-    ACTORS_API_URL
-)
-
-fake = Faker()
+from tests.base_test import BaseTest
+from pages.actor_page import ActorPage
+from config_data import ACTORS_API_URL
 
 
-def test_e2e_adding_delete_actor(driver, db_connection):
-    random_first_name = fake.first_name()
-    random_last_name = fake.last_name()
+class TestActorHappyFlowE2E(BaseTest):
+    actor_page: ActorPage
 
-    new_actor = {
-        "first_name": random_first_name,
-        "last_name": random_last_name,
-        "last_update": "2006-02-15 04:34:33"
-    }
-    response = requests.post(ACTORS_API_URL, json=new_actor)
-    data = response.json()
-    assert response.status_code == 201, "New Actor was not created successfully..."
-    assert data["first_name"] == random_first_name
+    def test_add_and_delete_actor_full_lifecycle(self, db_connection):
+        """
+        E2E Happy Flow — full actor lifecycle:
+        1. CREATE  : POST new actor via API  → assert 201 + correct name returned.
+        2. UI CHECK: open actor page         → assert new actor appears as last row.
+        3. DELETE  : DELETE actor via API    → assert 204.
+        4. DB CHECK: query by id             → assert row is gone.
+        """
+        fake = Faker()
+        first_name = fake.first_name()
+        last_name = fake.last_name()
 
-    # UI VERIFICATION
-    driver.get(UI_BASE_URL)
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_all_elements_located((By.XPATH, ACTOR_LIST)))
-    actor_list = driver.find_elements(By.XPATH, ACTOR_LIST)
-    last_actor = actor_list[-1]
-    assert random_first_name in last_actor.text
+        # ── Step 1: CREATE ────────────────────────────────────────────
+        response = requests.post(ACTORS_API_URL, json={
+            "first_name": first_name,
+            "last_name": last_name,
+            "last_update": "2006-02-15 04:34:33"
+        })
+        assert response.status_code == 201, (f"Expected 201 Created, got {response.status_code}: {response.json()}")
+        actor_data = response.json()
+        actor_id = actor_data["id"]
 
-    # DELETING ACTOR VIA API
-    response = requests.delete(f"{ACTORS_API_URL}/{data['id']}")
-    assert response.status_code == 204, "Actor was not deleted successfully..."
+        assert actor_data["first_name"] == first_name, (
+            f"First name mismatch. Expected '{first_name}', got '{actor_data['first_name']}'")
 
-    # SEARCHING THE DELETED ACTOR IN DB
-    cursor = db_connection.cursor()
-    cursor.execute('SELECT * FROM actor WHERE actor_id =%s', (data['id'],))
-    result = cursor.fetchone()
-    assert result is None, "The actor was not deleted"
-    cursor.close()
-    db_connection.close()
+        # ── Step 2: UI CHECK ──────────────────────────────────────────
+        self.actor_page.open()
+
+        last_actor = self.actor_page.get_last_actor_row()
+        assert last_actor is not None, "Actor table is empty — cannot verify."
+        assert first_name in last_actor.text, (
+            f"New actor '{first_name}' not found in last row. Got: '{last_actor.text}'")
+
+        # ── Step 3: DELETE ────────────────────────────────────────────
+        response = requests.delete(f"{ACTORS_API_URL}/{actor_id}")
+        assert response.status_code == 204, (f"Expected 204 No Content on delete, got {response.status_code}")
+
+        # ── Step 4: DB CHECK ──────────────────────────────────────────
+        cursor = db_connection.cursor()
+        cursor.execute("SELECT * FROM actor WHERE actor_id = %s", (actor_id,))
+        assert cursor.fetchone() is None, (f"Actor id {actor_id} still exists in the database after deletion.")
+        cursor.close()

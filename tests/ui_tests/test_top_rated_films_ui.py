@@ -1,29 +1,19 @@
+# test_top_rated_films_ui.py
 import pytest
-from selenium import webdriver
-from selenium.webdriver import ActionChains
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from config_data import (
-    UI_BASE_URL,
-    ACTOR_LIST,
-    RESUL_TEXT
-)
+from tests.base_test import BaseTest
+from pages.film_page import FilmPage
 
 
-def test_top_rated_films_ui(driver):
-    driver.get(UI_BASE_URL)
-    top_rated_films = driver.find_element(By.XPATH, "//a[@class='nav-link'][2]")
-    top_rated_films.click()
-    wait = WebDriverWait(driver, 10)
-    wait.until(EC.presence_of_element_located((By.XPATH, RESUL_TEXT)))
-    result_text = driver.find_element(By.XPATH, RESUL_TEXT)
-    assert "Top Rated Films" in result_text.text
-    table_rows = driver.find_elements(By.XPATH, ACTOR_LIST)
-    film_found = False
-    for row in table_rows:
-        if "ADAPTATION HOLES" in row.text:
-            film_found = True
-            break
-    assert film_found, "The film 'ADAPTATION HOLES' was not found in the table rows."
+class TestFilmsUI(BaseTest):
+    film_page: FilmPage
+
+    def test_top_rated_films_ui(self):
+        self.film_page.open_top_rated()
+
+        loaded = self.film_page.wait_for_results_to_load()
+        assert loaded, "The films page did not load correctly."
+
+        assert self.film_page.is_top_rated_header_correct(), "Header text mismatch!"
+
+        film_found = self.film_page.is_text_present_in_table("ADAPTATION HOLES")
+        assert film_found, "The film 'ADAPTATION HOLES' was not found in the table."
