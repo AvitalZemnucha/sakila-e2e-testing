@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        githubPush()             // auto-run on every push to main
-        cron('H 2 * * *')        // also run nightly at ~2am
+        githubPush()    // auto-run on every push to main
     }
 
     parameters {
