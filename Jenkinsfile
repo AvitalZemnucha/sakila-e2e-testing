@@ -2,7 +2,11 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Select browser for tests')
+        choice(
+            name: 'BROWSERS',
+            choices: ['all', 'chrome', 'firefox', 'edge'],
+            description: 'Select browser(s) for tests. "all" runs Chrome, Firefox and Edge in parallel.'
+        )
     }
 
     stages {
@@ -27,7 +31,25 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat "venv\\Scripts\\activate.bat && pytest --browser=${params.BROWSER} --junitxml=test-results/results.xml"
+                script {
+                    if (params.BROWSERS == 'all') {
+                        // Run all three browsers in parallel — matches conftest.py params=["chrome","firefox","edge"]
+                        parallel(
+                            Chrome: {
+                                bat "venv\\Scripts\\activate.bat && pytest -k chrome --junitxml=test-results/results-chrome.xml -v"
+                            },
+                            Firefox: {
+                                bat "venv\\Scripts\\activate.bat && pytest -k firefox --junitxml=test-results/results-firefox.xml -v"
+                            },
+                            Edge: {
+                                bat "venv\\Scripts\\activate.bat && pytest -k edge --junitxml=test-results/results-edge.xml -v"
+                            }
+                        )
+                    } else {
+                        // Run only the selected browser
+                        bat "venv\\Scripts\\activate.bat && pytest -k ${params.BROWSERS} --junitxml=test-results/results-${params.BROWSERS}.xml -v"
+                    }
+                }
             }
         }
     }
@@ -50,6 +72,7 @@ pipeline {
                     Please check the Jenkins build:
                     Build URL: ${BUILD_URL}
                     Build Status: ${currentBuild.currentResult}
+                    Browser(s): ${BROWSERS}
                 ''',
                 compressLog: true,
                 subject: "Build '${env.JOB_NAME}' (#${env.BUILD_NUMBER}) ${currentBuild.currentResult}",
