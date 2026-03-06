@@ -1,15 +1,19 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1>Add New Actor</h1>
-<form method="post">
-    <div class="form-group">
-        <label for="first_name">First Name</label>
-        <input type="text" class="form-control" id="first_name" name="first_name" required>
-    </div>
-    <div class="form-group">
-        <label for="last_name">Last Name</label>
-        <input type="text" class="form-control" id="last_name" name="last_name" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
+<div style="max-width: 480px; background: var(--bg-card); border: 1px solid var(--border); border-top: 1px solid rgba(201,168,76,0.3); border-radius: 10px; padding: 2rem 2.5rem; margin-top: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.4);">
+    <form method="post">
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="e.g. Meryl" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="e.g. Streep" required>
+        </div>
+        <button type="submit" class="btn btn-primary"
+                style="margin-top:1.5rem; width:100%; justify-content:center; padding:0.75rem;">Create Actor
+        </button>
+    </form>
+</div>
 {% endblock %}

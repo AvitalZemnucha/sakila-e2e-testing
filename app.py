@@ -59,6 +59,17 @@ def index():
     return render_template('index.html', actors=actors)
 
 
+@app.route('/api/actors', methods=['DELETE'])
+def delete_all_actors():
+    try:
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM actor")
+        db.commit()
+        return '', 204
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/top_rated_films')
 def top_rated_films():
     page = request.args.get('page', 1, type=int)

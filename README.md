@@ -123,3 +123,20 @@ pytest --html=reports/report.html --self-contained-html
 
 ---
 
+## 🚀 CI/CD: Running Jenkins Locally
+
+Jenkins is used to orchestrate the execution of the Sakila E2E testing suite. Follow these steps to run it on your local
+machine.
+
+### 1. Prerequisites
+
+* **Java:** Version 17, 21, or 24 (See Startup for Java 24 fix).
+* **Jenkins:** `jenkins.war` file downloaded from [Jenkins.io](https://www.jenkins.io/download/).
+
+### 2. Startup Command
+
+If you are using **Java 24** (or newer), you must use the `--enable-future-java` flag to bypass version restrictions:
+
+```batch
+java -jar jenkins.war --httpPort=8080 --enable-future-java
+
