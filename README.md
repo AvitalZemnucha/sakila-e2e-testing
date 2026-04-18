@@ -98,17 +98,23 @@ pytest --html=reports/report.html --self-contained-html
 
 ```text
 .
-├── app.py              # Flask Application
-├── config_data.py      # Test Data & Locators (Constants)
-├── conftest.py         # Shared Pytest Fixtures
+├── app.py              # Flask Application (The SUT - System Under Test)
+├── config_data.py      # Test Data, Locators & Constants
+├── conftest.py         # Shared Pytest Fixtures & Browser Setup
 ├── pages/              # Page Object Model (POM) Classes
-│   └── actor_page.py
-├── tests/              # Test Packages
-│   ├── api_tests/
-│   ├── db_tests/
-│   ├── ui_tests/
-│   └── e2e/
-└── pytest.ini          # Pytest Configuration
+│   ├── base_page.py    # Common UI actions & Base Page class
+│   ├── actor_page.py   # Page Objects for Actor-related flows
+│   └── film_page.py    # Page Objects for Film-related flows
+├── tests/              # Test Suites
+│   ├── api_tests/      # REST API validation tests
+│   ├── db_tests/       # Database integrity & query tests
+│   ├── ui_tests/       # Web UI functional tests
+│   │   └── base_test.py # Base class for UI tests setup/teardown
+│   └── e2e/            # Full End-to-End business scenarios
+├── Jenkinsfile         # CI/CD Pipeline configuration
+├── pytest.ini          # Pytest execution settings & markers
+├── .env                # Environment variables (Secrets & Config)
+└── requirements.txt    # Project dependencies
 
 ```
 
