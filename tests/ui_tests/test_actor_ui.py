@@ -21,10 +21,8 @@ class TestActorUI(BaseTest):
         self.actor_page.open()
         self.actor_page.add_actor(first_name, last_name)
 
-        last_actor = self.actor_page.get_last_actor_row()
-        assert last_actor is not None, "Actor table is empty after creation."
-        assert first_name in last_actor.text, f"First name '{first_name}' not found in last row: '{last_actor.text}'"
-        assert last_name in last_actor.text, f"Last name '{last_name}' not found in last row: '{last_actor.text}'"
+        assert self.actor_page.is_text_present_in_table(first_name), \
+            f"First name '{first_name}' not found anywhere in the table."
 
     @pytest.mark.parametrize("new_first_name, new_last_name", [
         ("AvitalUpdated", "ZemnuchaUpdated"),

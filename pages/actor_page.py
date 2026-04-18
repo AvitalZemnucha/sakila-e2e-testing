@@ -1,9 +1,8 @@
 from pages.base_page import BasePage
 from PIL import Image, ImageChops
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
 from config_data import (
     UI_BASE_URL, ACTOR_LIST, CREATE_NEW_ACTOR, NEW_ACTOR_SUBMIT,
     FIRST_NAME_ID, LAST_NAME_ID, EDIT_FIRST_NAME_ID,
@@ -36,7 +35,6 @@ class ActorPage(BasePage):
         self.click_add_new_actor()
         self.fill_new_actor_form(first_name, last_name)
         self.submit_new_actor_form()
-        # Wait for table to refresh using the existing locator from config
         self.wait_for_element_visible(By.XPATH, ACTOR_LIST)
 
     # --- Edit Flow ---
@@ -45,7 +43,6 @@ class ActorPage(BasePage):
         self.click((By.XPATH, edit_xpath))
 
     def clear_edit_form(self):
-        """NEW: Clears fields in the edit modal to fix unresolved reference."""
         self.driver.find_element(By.ID, EDIT_FIRST_NAME_ID).clear()
         self.driver.find_element(By.ID, EDIT_LAST_NAME_ID).clear()
 
@@ -62,7 +59,6 @@ class ActorPage(BasePage):
         self.clear_edit_form()
         self.fill_edit_form(first_name, last_name)
         self.submit_edit_form()
-        # Read validation message NOW — modal is still open if validation failed
         return self.get_any_error_message_from_open_modal(first_name, last_name)
 
     def fill_edit_form(self, first_name="", last_name=""):
@@ -76,29 +72,48 @@ class ActorPage(BasePage):
 
     # --- Table Actions & Verification ---
     def get_all_actors_elements(self):
+        """Always re-fetches from DOM to avoid StaleElementReferenceException."""
         self.wait.until(EC.presence_of_element_located((By.XPATH, ACTOR_LIST)))
         return self.driver.find_elements(By.XPATH, ACTOR_LIST)
 
-    def get_last_actor_row(self):
-        """NEW: Returns the last row element in the actor table."""
-        rows = self.get_all_actors_elements()
-        return rows[-1] if rows else None
+    def test_create_actor(self, first_name, last_name):
+        """Tests the creation of new actors using multiple data sets."""
+        self.actor_page.open()
+        self.actor_page.add_actor(first_name, last_name)
+
+        assert self.actor_page.is_text_present_in_table(first_name), \
+            f"First name '{first_name}' not found anywhere in the table."
 
     def is_text_present_in_table(self, text):
-        """NEW: Verifies text presence to fix unresolved reference."""
-        rows = self.get_all_actors_elements()
-        return any(text in row.text for row in rows)
+        """Re-fetches rows fresh to avoid StaleElementReferenceException after page update."""
+        self.wait.until(EC.presence_of_element_located((By.XPATH, ACTOR_LIST)))
+        rows = self.driver.find_elements(By.XPATH, ACTOR_LIST)
+        for row in rows:
+            try:
+                if text in row.text:
+                    return True
+            except Exception:
+                # Row went stale mid-iteration — re-fetch and retry once
+                rows = self.driver.find_elements(By.XPATH, ACTOR_LIST)
+                if any(text in r.text for r in rows):
+                    return True
+        return False
 
     def delete_actor_by_name(self, first_name):
-        """NEW: Cleanup helper for regression tests."""
-        rows = self.get_all_actors_elements()
+        """Scroll button into view and use JS click to bypass ElementClickInterceptedException."""
+        self.wait.until(EC.presence_of_element_located((By.XPATH, ACTOR_LIST)))
+        rows = self.driver.find_elements(By.XPATH, ACTOR_LIST)
         for row in rows:
-            if first_name in row.text:
-                delete_btn = row.find_element(By.XPATH, ".//button[contains(text(), 'Delete')]")
-                delete_btn.click()
-                self.wait.until(EC.alert_is_present())
-                self.driver.switch_to.alert.accept()
-                break
+            try:
+                if first_name in row.text:
+                    delete_btn = row.find_element(By.XPATH, ".//button[contains(text(), 'Delete')]")
+                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", delete_btn)
+                    self.driver.execute_script("arguments[0].click();", delete_btn)
+                    self.wait.until(EC.alert_is_present())
+                    self.driver.switch_to.alert.accept()
+                    break
+            except Exception:
+                continue
 
     def delete_last_actor(self) -> None:
         """Delete the last actor row in the table."""
@@ -106,15 +121,14 @@ class ActorPage(BasePage):
         if not rows:
             return
         delete_btn = rows[-1].find_element(By.XPATH, ".//button[contains(text(), 'Delete')]")
-        delete_btn.click()
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", delete_btn)
+        self.driver.execute_script("arguments[0].click();", delete_btn)
         self.wait.until(EC.alert_is_present())
         self.driver.switch_to.alert.accept()
-        # Wait for the row to disappear before returning
         self.wait.until(EC.staleness_of(rows[-1]))
 
     # --- Validation Helpers ---
     def get_field_validation_message(self, field_id):
-        """FIXED: Renamed to match TestNegativeFlow call."""
         return self.get_validation_message((By.ID, field_id))
 
     def get_any_error_message_from_open_modal(self, first_name: str, last_name: str):
@@ -122,12 +136,9 @@ class ActorPage(BasePage):
         Called immediately after submit while modal is still visible.
         Checks the empty field for a validation message, or catches an alert.
         """
-        # Determine which field to check — the one that was left empty
         field_id = EDIT_FIRST_NAME_ID if not first_name else EDIT_LAST_NAME_ID
 
-        # Check for JS alert first (overflow case) with short timeout
         try:
-            from selenium.webdriver.support.ui import WebDriverWait
             WebDriverWait(self.driver, 2).until(EC.alert_is_present())
             alert = self.driver.switch_to.alert
             msg = alert.text
@@ -136,7 +147,6 @@ class ActorPage(BasePage):
         except Exception:
             pass
 
-        # Modal still open — read HTML5 validation message directly from the field
         try:
             field = self.driver.find_element(By.ID, field_id)
             msg = self.driver.execute_script("return arguments[0].validationMessage;", field)
@@ -154,8 +164,8 @@ class ActorPage(BasePage):
         except Exception:
             return ""
 
+    # --- Screenshot & Visual Regression ---
     def take_screenshot(self, name: str):
-        """Saves a screenshot to the current directory."""
         self.driver.save_screenshot(name)
 
     def compare_screenshots(self, baseline_path: str, current_path: str):
