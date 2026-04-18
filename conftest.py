@@ -28,7 +28,7 @@ def db_connection():
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", "avitalz"),
         database=os.getenv("DB_NAME", "sakila"),
-        autocommit=True  # always reads current DB state — no manual commit() needed
+        autocommit=True
     )
     yield connection
     connection.close()
@@ -67,8 +67,27 @@ def driver(request):
         drv = webdriver.Chrome(service=service, options=options)
 
     elif browser == "firefox":
-        service = FirefoxService(GeckoDriverManager().install())
-        drv = webdriver.Firefox(service=service, options=options)
+        possible_paths = [
+            os.path.join(os.getcwd(), "geckodriver.exe"),
+            os.path.join(os.path.dirname(__file__), "geckodriver.exe"),
+            os.path.join(os.path.dirname(__file__), "drivers", "geckodriver.exe"),
+        ]
+        local_path = next((p for p in possible_paths if os.path.exists(p)), None)
+
+        if local_path:
+            print(f"\n[Firefox] Using local driver found at: {local_path}")
+            options.binary_location = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+            drv = webdriver.Firefox(service=FirefoxService(executable_path=local_path), options=options)
+        else:
+            print("\n[Firefox] Local driver not found, attempting auto-download...")
+            try:
+                drv = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
+            except Exception as e:
+                pytest.fail(
+                    f"[Firefox] Both local lookup and auto-download failed.\n"
+                    f"Searched paths: {possible_paths}\n"
+                    f"Error: {e}"
+                )
 
     elif browser == "edge":
         possible_paths = [
