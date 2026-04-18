@@ -18,8 +18,8 @@ class TestNegativeFlowE2EActor(BaseTest):
             f"Unexpected error message: {response.json()}"
         )
         self.actor_page.open()
-        last_actor = self.actor_page.get_last_actor_row()
+        last_actor = self.actor_page.get_last_actor_row_text()
         assert last_actor is not None, "Actor table is empty — cannot verify."
-        assert "Danielle" not in last_actor.text, (
-            f"Invalid actor appeared in the table. Last row: '{last_actor.text}'"
+        assert "Danielle" not in last_actor, (
+            f"Invalid actor appeared in the table. Last row: '{last_actor}'"
         )

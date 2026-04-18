@@ -76,6 +76,18 @@ class ActorPage(BasePage):
         self.wait.until(EC.presence_of_element_located((By.XPATH, ACTOR_LIST)))
         return self.driver.find_elements(By.XPATH, ACTOR_LIST)
 
+    def get_last_actor_row_text(self):
+        """Returns the text of the last row safely without exposing the element."""
+        self.wait.until(EC.presence_of_element_located((By.XPATH, ACTOR_LIST)))
+        rows = self.driver.find_elements(By.XPATH, ACTOR_LIST)
+        if not rows:
+            return None
+        try:
+            return rows[-1].text
+        except Exception:
+            rows = self.driver.find_elements(By.XPATH, ACTOR_LIST)
+            return rows[-1].text if rows else None
+
     def test_create_actor(self, first_name, last_name):
         """Tests the creation of new actors using multiple data sets."""
         self.actor_page.open()
@@ -157,9 +169,11 @@ class ActorPage(BasePage):
     def get_actor_row_text(self, actor_id: int) -> str:
         """Return the full text of the row matching actor_id, waiting for it to be visible."""
         try:
-            row = self.wait.until(
+            self.wait.until(
                 EC.visibility_of_element_located((By.XPATH, f"//tr[@id='actor-{actor_id}']"))
             )
+            # Re-fetch fresh after wait to avoid staleness
+            row = self.driver.find_element(By.XPATH, f"//tr[@id='actor-{actor_id}']")
             return row.text
         except Exception:
             return ""

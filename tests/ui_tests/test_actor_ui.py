@@ -24,16 +24,14 @@ class TestActorUI(BaseTest):
         assert self.actor_page.is_text_present_in_table(first_name), \
             f"First name '{first_name}' not found anywhere in the table."
 
-    @pytest.mark.parametrize("new_first_name, new_last_name", [
-        ("AvitalUpdated", "ZemnuchaUpdated"),
-        ("UpdatedJohn", "UpdatedDoe"),
-        ("RenamedQA", "RenamedUser"),
+    @pytest.mark.parametrize("actor_id, new_first_name, new_last_name", [
+        (1, "AvitalUpdated", "ZemnuchaUpdated"),
+        (2, "UpdatedJohn", "UpdatedDoe"),
+        (3, "RenamedQA", "RenamedUser"),
     ])
-    def test_update_actor(self, new_first_name, new_last_name):
+    def test_update_actor(self, actor_id, new_first_name, new_last_name):
         """Tests updating an existing actor and verifies the changes in the UI."""
-        actor_id = 1
         self.actor_page.open()
-        # Perform  update
         self.actor_page.update_actor(actor_id, new_first_name, new_last_name)
         updated_row_text = self.actor_page.get_actor_row_text(actor_id)
         assert new_first_name in updated_row_text, f"{new_first_name} not found in row!"
